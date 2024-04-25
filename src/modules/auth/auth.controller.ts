@@ -1,44 +1,26 @@
-import {
-    Controller,
-    Post,
-    Body,
-    Put,
-  } from '@nestjs/common';
-import { AuthService } from './auth.services';
-import { LoginUserDto } from './dto/user-login.dto';
-  
-@Controller("auth")
+import { Controller, Post, UseGuards, Body, Req, Get } from '@nestjs/common';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CreateUserDto, LoginUserDto } from './dto';
+import { UserDocument } from '../database/models/user.model';
+import { authService } from './auth.service';
+
+
+@ApiTags('Auth')
+@Controller('auth')
 export class AuthController {
-    constructor (private readonly authService: AuthService) {}
+  constructor(private authService: authService) {}
 
-    @Post("signup")
-    async signup(@Body() userData) {
-        try {
-            return await this.authService.signup(userData);
-        } catch(error) {
-            return error.data
-        }
-    }
+  @ApiOperation({ summary: 'Регистрация' })
+  @Post('signup')
+  async signup(@Body() userData: CreateUserDto): Promise<UserDocument> {
+    return await this.authService.signup(userData);
+  }
 
-    @Post("login")
-    async login(@Body() userLogin: LoginUserDto) {
-        try {
-            return await this.authService.login(userLogin)
-        } catch(error) {
-            return error.data
-        }
-    }
-
-    @Put("change-password")
-    async changePassword(@Body() changePasswordData: { email: string, newPassword: string }) {
-        try {
-            const { email, newPassword } = changePasswordData;
-            return await this.authService.changePassword(email, newPassword);
-        } catch (error) {
-            return error.data;
-        }
-    }
-
-    
-    
+  @ApiOperation({ summary: 'Логин' })
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  async login(@Body() userData: LoginUserDto, @Req() req) {
+    return this.authService.login(userData, req.user);
+  }
 }
