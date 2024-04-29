@@ -38,6 +38,15 @@ export class User {
   @ApiProperty({ type: 'boolean' })
   @Prop({ default: false })
   is_deleted: boolean;
+
+  @Prop({ default: 0 })
+  attempts: number;
+
+  @Prop({ default: false })
+  isBlocked: boolean;
+
+  @Prop({ type: Date })
+  blockedUntil: Date;
 }
 
 export type UserDocument = User & mongoose.Document;

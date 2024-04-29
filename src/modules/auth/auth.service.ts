@@ -25,12 +25,11 @@ export class authService {
   ): Promise<UserDocument | string> {
     try {
       const user = await this.usersService.findOne({ email, password });
-      if (!user) {
+      if (!user) {        
         return null;
       }
       return user;
     } catch (error) {
-
       return error.data;
     }
   }
